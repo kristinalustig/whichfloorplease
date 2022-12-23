@@ -1,5 +1,4 @@
 local E = require "elevator"
-local P = require "person"
 --getcher assets here!
 C = {}
 
@@ -52,7 +51,16 @@ function C.draw()
   DrawElevatorDoors()
   DrawDoors()
   
-  lg.draw(spritesheet, people[1], 400, 300, 0, .5, .5)
+end
+
+
+function C.getLoc(l)
+  
+  if l == "out" then
+    return 300, 500
+  else
+    return doors[l][1], doors[l][2]
+  end
   
 end
 
@@ -208,13 +216,6 @@ function InitPeople()
   for i=0, 15 do
     table.insert(people, lg.newQuad(32*i, 576, 32, 64, 512, 640))
   end
-  
-end
-
-
-function DrawPeople()
-  
-  
   
 end
 
