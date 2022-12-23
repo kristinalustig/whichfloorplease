@@ -9,6 +9,8 @@ local elevatorRight
 local elevatorDoorAnims
 local elevatorDoors = {}
 local elevatorDoorFrames = {}
+local elevatorDoorFloors = {}
+local elevatorDoorFloorQuads = {}
 local elevatorDirections = {}
 local elevatorFrameAnims
 local frontDoor = {}
@@ -32,7 +34,7 @@ function C.init()
   elevatorLeft = lg.newQuad(0, 376, 192, 192, 512, 640)
   elevatorRight = lg.newQuad(320, 376, 192, 192, 512, 640)
   numberSprites = lg.newImage("/assets/highlights.png")
-  thoughtBubbleImg = lg.newQuad(448, 192, 128, 64, 512, 640)
+  thoughtBubbleImg = lg.newQuad(192, 448, 128, 64, 512, 640)
   
   InitDoors()
   InitElevatorDoors()
@@ -56,6 +58,7 @@ function C.draw()
   DrawNumberHighlights()
   lg.draw(spritesheet, elevatorLeft, 40, E.getPosition("left"), 0, .5, .5)
   lg.draw(spritesheet, elevatorRight, 400, E.getPosition("right"), 0, .5, .5)
+  DrawElevatorIndicators()
   DrawDoors()
   DrawElevatorDoors()
   DrawFrontDoor()
@@ -104,9 +107,9 @@ function C.updateAptDoorStatus(l, dir)
   
   local d
   
-  if l == "out" then
+  if l == "out" or l == 23 then
     d = frontDoor[3]
-    if d == 1 then
+    if d == 1  and dir == "open" then
       frontDoor[3] = 2
     elseif d == 3 and dir == "open" then
       frontDoor[3] = 4
@@ -116,12 +119,14 @@ function C.updateAptDoorStatus(l, dir)
       frontDoor[3] = 3
     elseif d == 2 and dir == "closed" then
       frontDoor[3] = 1
-    elseif d == 4 then
+    elseif d == 4 and dir == "closed" then
       frontDoor[3] = 3
     end
   else
     d = doors[l][3]
-    if d == 1 or d == 3 then
+    if d == 1 and dir == "open" then
+      doors[l][3] = 2
+    elseif d == 3 and dir == "closed" then
       doors[l][3] = 2
     elseif d == 2 and dir == "open" then
       doors[l][3] = 3
@@ -141,15 +146,25 @@ function C.updateElevatorIndicator(el, df, act)
     tb = tbRight
   end
   
-  for _, v in ipairs(tb) do
+  for k, v in ipairs(tb) do
     if v == df then 
       if act == "remove" then
-        table.remove(tb, k)
+        if el == "left" then
+          table.remove(tbLeft, k)
+        else
+          table.remove(tbRight, k)
+        end
       end
       return
     end
   end
-  table.insert(tb, df)
+  if act == "add" then
+    if el == "left" then
+      table.insert(tbLeft, df)
+    else
+      table.insert(tbRight, df)
+    end
+  end
   
 end
 
@@ -258,16 +273,34 @@ function InitElevatorDoors()
     lg.newQuad(320, 0, 64, 128, 512, 640),
     lg.newQuad(384, 0, 64, 128, 512, 640)
   }
+  
+  elevatorDoorFloorQuads =
+  {
+    lg.newQuad(320, 256, 64, 24, 512, 640),
+    lg.newQuad(384, 256, 64, 24, 512, 640),
+    lg.newQuad(320, 296, 64, 24, 512, 640),
+    lg.newQuad(384, 296, 64, 24, 512, 640)
+  }
   --id = 1, x = 2, y = 3, currAnimNum = 4 <-- doors
   --id = 1,, x = 2, y = 3, upOrDown = 4 <-- frames
   for i=1, 7 do
     table.insert(elevatorDoorFrames, {i, 104, 500-(80*(i-1)), 1})
     table.insert(elevatorDoors, {i, 108, 512-(80*(i-1)), 1})
+    if i == 1 or i == 7 then
+      table.insert(elevatorDoorFloors, {110, 560-(80*(i-1)), 3})
+    else
+      table.insert(elevatorDoorFloors, {110, 560-(80*(i-1)), 1})
+    end
   end
   
   for i=8, 14 do
     table.insert(elevatorDoorFrames, {i, 388, 500-(80*(i-8)), 1})
     table.insert(elevatorDoors, {i, 392, 512-(80*(i-8)), 1})
+    if i == 8 or i == 14 then
+      table.insert(elevatorDoorFloors, {398, 560-(80*(i-8)), 4})
+    else
+      table.insert(elevatorDoorFloors, {398, 560-(80*(i-8)), 2})
+    end
   end
   
 end
@@ -277,9 +310,45 @@ function DrawElevatorDoors()
   for i=1, 14 do
     local d = elevatorDoors[i]
     local f = elevatorDoorFrames[i]
+    local g = elevatorDoorFloors[i]
     lg.draw(spritesheet, elevatorDoorAnims[d[4]], d[2], d[3], 0, .5, .5) 
     lg.draw(spritesheet, elevatorFrameAnims[f[4]], f[2], f[3], 0, .5, .5)
+    lg.draw(spritesheet, elevatorDoorFloorQuads[g[3]], g[1], g[2], 0, .5, .5)
   end
+end
+
+function DrawElevatorIndicators()
+  
+  local y1 = E.getPosition("left") + 20
+  local y2 = E.getPosition("right") + 20
+  
+  if #tbLeft > 0 then
+    lg.draw(spritesheet, thoughtBubbleImg, 52, y1, 0, .5, .5)
+    local str = ""
+    for _, v in ipairs(tbLeft) do
+      if str == "" then
+        str = v
+        str = v
+      else
+        str = str .. ", "..v
+      end
+    end
+    lg.printf(str, 52, y1+2, 40, "center", 0, .5, .5)
+  end
+  
+  if #tbRight > 0 then
+    lg.draw(spritesheet, thoughtBubbleImg, 410, y2, 0, .5, .5)
+    local str = ""
+    for _, v in ipairs(tbRight) do
+      if str == "" then
+        str = v
+      else
+        str = str .. ", "..v
+      end
+    end
+    lg.printf(str, 410, y2+2, 40, "center", 0, .5, .5)
+  end
+  
 end
 
 function DrawNumberHighlights()

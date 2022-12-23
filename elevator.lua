@@ -35,6 +35,9 @@ function E.init()
   doorTimingMin = 100
   elevator1.executingCommand = false
   elevator2.executingCommand = false
+  elevator1.peopleMoving = 0
+  elevator2.peopleMoving = 0
+
   
 end
 
@@ -63,7 +66,6 @@ function E.getElevatorQueues()
   return elTar1, elTar2, elCur1, elCur2
   
 end
-
 
 function E.getPosition(el)
   if el == "left" then
@@ -96,7 +98,7 @@ end
 
 function E.doorOpen()
   
-  if selectedElevator.executingCommand then
+  if selectedElevator.executingCommand or selectedElevator.peopleMoving > 0 then
     return
   end
   
@@ -111,7 +113,7 @@ end
 
 function E.moveElevator(dir)
   
-  if selectedElevator.doorState ~= 1 or selectedElevator.executingCommand then
+  if selectedElevator.doorState ~= 1 or selectedElevator.executingCommand or selectedElevator.peopleMoving > 0 then
     AddToMovementQueue(dir)
     return
   end
@@ -142,6 +144,22 @@ function E.switchElevators(mode)
     end
   end
   
+end
+
+function E.movingInOutElevator(el, dir)
+  
+  local delta
+  if dir == "add" then
+    delta = 1
+  else
+    delta = -1
+  end
+  
+  if el == "left" then
+    elevator1.peopleMoving = elevator1.peopleMoving + delta
+  else
+    elevator2.peopleMoving = elevator2.peopleMoving + delta
+  end
 end
 
 
