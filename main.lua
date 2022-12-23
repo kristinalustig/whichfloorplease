@@ -12,11 +12,13 @@ function love.load()
   push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {resizable = true, pixelperfect = true, highdpi = true})
   E.init()
   C.init()
+  P.init()
 end
 
 function love.update(dt)
   C.update(dt)
   E.update()
+  P.update()
 end
 
 function love.draw()
@@ -24,6 +26,10 @@ function love.draw()
 
   C.draw()
 
+  local mx, my = love.mouse.getX(), love.mouse.getY()
+  push:toGame(mx, my)
+  --lg.printf(mx.. ", "..my, mx, my-10, 100, "left")
+  
   push:finish()
 end
 

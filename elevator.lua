@@ -145,6 +145,61 @@ function E.switchElevators(mode)
 end
 
 
+function E.whichElevatorToPick(fromFloor, toFloor)
+  
+  if fromFloor == toFloor then
+    return "neither"
+  end
+  
+  local goingUp = fromFloor - toFloor < 0
+  local elDir1 = nil
+  local elDir2 = nil
+  
+  if elevator1.targetFloor ~= -100 then
+    elDir1 = elevator1.currentFloor - elevator1.targetFloor < 0
+  end
+  if elevator2.targetFloor ~= -100 then
+    elDir2 = elevator2.currentFloor - elevator1.targetFloor < 0
+  end
+  
+  if elDir1 ~= nil and elDir1 == goingUp then
+    return "left"
+  elseif elDir2 ~= nil and elDir2 == goingUp then
+    return "right"
+  else
+    if math.abs(fromFloor - elevator1.currentFloor) < math.abs(fromFloor - elevator2.currentFloor) then
+      return "left"
+    elseif math.abs(fromFloor - elevator1.currentFloor) > math.abs(fromFloor - elevator2.currentFloor) then
+      return "right"
+    else
+      local r = love.math.random(2)
+      if r == 1 then
+        return "right"
+      else
+        return "left"
+      end
+    end
+  end
+  
+end
+
+function E.hasElevatorArrived(el, fl)
+  
+  if el == "left" then 
+    el = elevator1 
+  else 
+    el = elevator2 
+  end
+  
+  if el.currentFloor == fl and el.doorState == 3 then
+    return true
+  else
+    return false
+  end
+  
+end
+
+
 -------USED LOCALLY ONLY -----------
 
 

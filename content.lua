@@ -11,6 +11,8 @@ local elevatorDoors = {}
 local elevatorDoorFrames = {}
 local elevatorDirections = {}
 local elevatorFrameAnims
+local frontDoor = {}
+local frontDoorAnims = {}
 local residents = {}
 local numberHighlights = {}
 local numberSprites
@@ -18,6 +20,10 @@ local areNumbersHighlighted = {}
 local people = {}
 local doors = {}
 local doorAnims = {}
+local thoughtBubbleImg
+local tbLeft = {}
+local tbRight = {}
+local peopleObjs = {}
 
 function C.init()
   
@@ -26,11 +32,13 @@ function C.init()
   elevatorLeft = lg.newQuad(0, 376, 192, 192, 512, 640)
   elevatorRight = lg.newQuad(320, 376, 192, 192, 512, 640)
   numberSprites = lg.newImage("/assets/highlights.png")
+  thoughtBubbleImg = lg.newQuad(448, 192, 128, 64, 512, 640)
   
   InitDoors()
   InitElevatorDoors()
   InitNumberHighlights()
   InitPeople()
+  InitFrontDoor()
   
 end
 
@@ -48,23 +56,132 @@ function C.draw()
   DrawNumberHighlights()
   lg.draw(spritesheet, elevatorLeft, 40, E.getPosition("left"), 0, .5, .5)
   lg.draw(spritesheet, elevatorRight, 400, E.getPosition("right"), 0, .5, .5)
-  DrawElevatorDoors()
   DrawDoors()
+  DrawElevatorDoors()
+  DrawFrontDoor()
+  DrawPeople()
+  
   
 end
 
 
 function C.getLoc(l)
   
-  if l == "out" then
-    return 300, 500
+  if l == "out" or l == 23 then
+    return frontDoor[1], frontDoor[2]
   else
     return doors[l][1], doors[l][2]
   end
   
 end
 
+function C.getAptDoorStatus(l)
+  
+  if l == "out" or l == 23 then
+    --do main door
+    local s = frontDoor[3]
+    if s == 1 then
+      return "closed"
+    elseif s == 2 or s == 3 then
+      return "notyet"
+    else
+      return "open"
+    end
+  else
+    local s = doors[l][3]
+    if s == 1 then
+      return "closed"
+    elseif s == 2 then
+      return "notyet"
+    else
+      return "open"
+    end
+  end
+  
+end
+
+function C.updateAptDoorStatus(l, dir)
+  
+  local d
+  
+  if l == "out" then
+    d = frontDoor[3]
+    if d == 1 then
+      frontDoor[3] = 2
+    elseif d == 3 and dir == "open" then
+      frontDoor[3] = 4
+    elseif d == 3 and dir == "closed" then
+      frontDoor[3] = 2
+    elseif d == 2 and dir == "open" then
+      frontDoor[3] = 3
+    elseif d == 2 and dir == "closed" then
+      frontDoor[3] = 1
+    elseif d == 4 then
+      frontDoor[3] = 3
+    end
+  else
+    d = doors[l][3]
+    if d == 1 or d == 3 then
+      doors[l][3] = 2
+    elseif d == 2 and dir == "open" then
+      doors[l][3] = 3
+    elseif d == 2 and dir == "closed" then
+      doors[l][3] = 1
+    end
+  end
+  
+end
+
+function C.updateElevatorIndicator(el, df, act)
+  
+  local tb
+  if el == "left" then
+    tb = tbLeft
+  else
+    tb = tbRight
+  end
+  
+  for _, v in ipairs(tb) do
+    if v == df then 
+      if act == "remove" then
+        table.remove(tb, k)
+      end
+      return
+    end
+  end
+  table.insert(tb, df)
+  
+end
+
+function C.updatePeople(p)
+  
+  peopleObjs = p
+  
+end
+
 -------USED LOCALLY ONLY -----------
+
+function InitFrontDoor()
+  
+  frontDoorAnims = 
+  {
+    lg.newQuad(0, 128, 128, 100, 512, 640),
+    lg.newQuad(128, 128, 128, 100, 512, 640),
+    lg.newQuad(256, 128, 128, 100, 512, 640),
+    lg.newQuad(384, 128, 128, 100, 512, 640)
+  }
+  
+  frontDoor = {228, 516, 1}
+  
+end
+
+function DrawFrontDoor()
+  
+  lg.draw(spritesheet, frontDoorAnims[frontDoor[3]], frontDoor[1], frontDoor[2], 0, .5, .5)
+  
+end
+  
+
 
 function GetDoorStatus()
   
@@ -182,7 +299,7 @@ function InitDoors()
   {
     lg.newQuad(0, 256, 128, 100, 512, 640),
     lg.newQuad(128, 256, 128, 100, 512, 640),
-    lg.newQuad(256, 256, 128, 100, 512, 640)
+    lg.newQuad(256, 256, 40, 100, 512, 640)
   }
   
   for i=1, 5 do
@@ -207,6 +324,7 @@ function DrawDoors()
       lg.printf(d[4], d[1], d[2]+4, 40, "center")
     end
   end
+  
 end
 
 
@@ -215,6 +333,16 @@ function InitPeople()
   
   for i=0, 15 do
     table.insert(people, lg.newQuad(32*i, 576, 32, 64, 512, 640))
+  end
+  
+end
+
+function DrawPeople()
+  
+  for k, v in ipairs(peopleObjs) do
+    if v.state ~= 1 then
+      lg.draw(spritesheet, people[v.sprite], v.x, v.y, 0, .5, .5)
+    end
   end
   
 end
