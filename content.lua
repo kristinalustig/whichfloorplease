@@ -35,6 +35,7 @@ local angryOutline
 local scoreL
 local scoreR
 local psState
+local elevatorHighlight
 
 function C.init()
   
@@ -48,8 +49,9 @@ function C.init()
   howToTwo = lg.newImage("/assets/howToTwo.png")
   pauseScreen = lg.newImage("/assets/pauseScreen.png")
   angryOutline = lg.newQuad(448, 256, 64, 128, 512, 640)
+  elevatorHighlight = lg.newImage("/assets/elevatorHighlight.png")
   scoreL = 0
-  scoreR = 1
+  scoreR = 0
   
   incr = 80*GS
   
@@ -81,8 +83,15 @@ function C.draw()
     lg.draw(howToOne, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
   end
   DrawNumberHighlights()
+  local sel = E.getSelected()
   lg.draw(spritesheet, elevatorLeft, 40*GS, E.getPosition("left"), 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 1 and sel == "left" then
+    lg.draw(elevatorHighlight, 40*GS, E.getPosition("left")+(16*GS), 0, GLOBALSCALE, GLOBALSCALE)
+  end
   lg.draw(spritesheet, elevatorRight, 400*GS, E.getPosition("right"), 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 1 and sel == "right" then
+    lg.draw(elevatorHighlight, 400*GS, E.getPosition("right")+(16*GS), 0, GLOBALSCALE, GLOBALSCALE)
+  end
   DrawElevatorIndicators()
   DrawDoors()
   DrawElevatorDoors()
@@ -112,18 +121,18 @@ function C.drawPauseScreen()
         lg.printf("Player Two wins the round "..scoreR.." to "..scoreL.."!", 0, 200*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
       end
     end
-    lg.printf("READY...", 0, 360*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("SET...", 0, 380*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("Press enter to start the next round", 0, 400*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("READY...", 0, 360*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("SET...", 0, 380*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Press enter to start the next round", 0, 400*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
   else
-    lg.printf("GAME PAUSED", 0, 40*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("You'll be playing as an elevator operator.", 0, 90*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("Control your elevator with the directions to the right.", 0, 120*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("The faster your get residents to their destinations, the higher your score! If you're slow, they might turn red with anger.", 0, 180*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("READY...", 0, 360*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("SET...", 0, 380*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("GAME PAUSED", 0, 40*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("You'll be playing as an elevator operator.", 0, 90*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Control your elevator with the directions to the right.", 0, 120*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("The faster your get residents to their destinations, the higher your score! If you're slow, they might turn red with anger.", 0, 180*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("READY...", 0, 360*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("SET...", 0, 380*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
     --regular pause screen
-    lg.printf("Press enter to get moving!", 0, 400*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Press enter to get moving!", 0, 400*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
   end
   
   
@@ -329,7 +338,7 @@ function DrawFloorIndicators()
       lg.setColor(1, 1, 1)
     end
     if #v.right.waiting > 0 then
-      lg.draw(spritesheet, thoughtBubbleImg, v.right.x, v.right.y)
+      lg.draw(spritesheet, thoughtBubbleImg, v.right.x, v.right.y, 0, GLOBALSCALE, GLOBALSCALE)
       local str = ""
       for k1, v1 in ipairs(v.right.waiting) do
         if str == "" then

@@ -73,8 +73,8 @@ function P.init()
   timeLeft = 100
   time = math.floor(love.timer.getTime())
   
-  timeLeft = 60
-  numRounds = 2
+  timeLeft = 75
+  numRounds = 3
   
   destinations = 
   {
@@ -142,14 +142,39 @@ function P.draw()
   
   lg.setFont(titleFont)
   lg.draw(scoreBoard, 116*GS, 0, 0, GLOBALSCALE*.4, GLOBALSCALE*.4)
-  lg.printf("P1: "..scoreL, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
-  lg.printf(scoreR..": P2", 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
-  lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
-  lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 24*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+  if GLOBALPLAYERS == 2 then
+    lg.printf("P1: "..scoreL, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(scoreR..": P2", 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 24*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+  else
+    lg.printf("Score: "..scoreL+scoreR, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+  end
 end
 
 function P.drawGameOver()
   
+  lg.setColor(1, 1, 1)
+  lg.draw(gameOverScreen, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  lg.setFont(titleFont)
+  lg.setColor(232/255, 193/255, 112/255)
+  lg.printf("Thanks for playing!", 400*GS, 100*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 2 then
+    local w = 2
+    if scoreL > scoreR then
+      w = 1
+    end
+    lg.printf("Player "..w.." wins!", 400*GS, 160*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Player 1: "..scoreL, 400*GS, 180*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Player 2: "..scoreR, 400*GS, 200*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+  else
+    lg.printf("Your score was "..scoreL + scoreR.."!", 400*GS, 160*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("You moved a total of "..numPeopleMovedL+numPeopleMovedR.." people!", 400*GS, 180*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+  end
+  lg.printf("To play again, restart the program.", 100*GS, 400*GS, 600*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+  lg.printf("All art, code, and music by kristinamay. Additional SFX, font, and playtesting credits on itch.io!", 100*GS, 500*GS, 600*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
 end
 
 

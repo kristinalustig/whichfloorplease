@@ -41,6 +41,8 @@ function E.init()
   elevator2.executingCommand = false
   elevator1.peopleMoving = 0
   elevator2.peopleMoving = 0
+  elevator1.name = "left"
+  elevator2.name = "right"
   elevatorArrive = la.newSource("/assets/elevatorArrive.wav", "static")
   elevatorArrive:setVolume(.5)
   elevatorMove = la.newSource("/assets/elevatorMove.wav", "static")
@@ -83,6 +85,13 @@ function E.getPosition(el)
   elseif el == "right" then
     return elevator2.position
   end
+end
+
+
+function E.getSelected()
+  
+  return selectedElevator.name
+  
 end
 
 

@@ -1,0 +1,11 @@
+name: whichfloorplease
+shortname: whichfloorplease
+version: 0.0.1
+assets:
+  - "*.lua"
+  - assets/**/*
+targets:
+  - love
+  - web
+  - win-32
+  - win-64
