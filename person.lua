@@ -160,7 +160,7 @@ function UpdatePeopleStatus()
             v.destinationRoom = love.math.random(20)
           end
           --if the destination and location are the same, just bow out for a tick
-          if v.destinationRoom == v.location or (v.location == "out" and v.destination == destinations.out) or (v.location == 23 and v.destination == destinations.out) then
+          if v.destinationRoom == v.location or (v.location == "out" and v.destination == destinations.out) or (v.location == 23 and v.destination == destinations.out) or (v.location == "out" and v.destination == destinations.out) then
             v.destination = nil
             v.destinationRoom = nil
           end
@@ -180,7 +180,7 @@ function UpdatePeopleLocation()
       if v.timeout > 0 then
         v.timeout = v.timeout - 1
       else
-        v.x, v.y, v.destination, v.location, v.state, v.destinationRoom = Move(v.x, v.y, v.destination, v.location, v.state, v.floor, v.destinationRoom)
+        v.x, v.y, v.destination, v.location, v.state, v.destinationRoom, v.floor = Move(v.x, v.y, v.destination, v.location, v.state, v.floor, v.destinationRoom)
         if v.destination == nil then
           v.timeout = 1000
         end
@@ -193,6 +193,10 @@ end
 
 --px, py, dest, loc, state, floor, destination room
 function Move(x, y, d, l, s, f, dr)
+  
+  if f == nil then
+    f = GetFloor(l)
+  end
   
   if dr == nil then --ugh i don't know why this happens but here we are
     if d == destinations.out then
@@ -407,6 +411,7 @@ function Move(x, y, d, l, s, f, dr)
         d = nil
         l = dr
         dr = nil
+        f = df
       end
     end
   elseif s == states.exitBuilding then
@@ -430,11 +435,12 @@ function Move(x, y, d, l, s, f, dr)
         d = nil
         l = dr
         dr = nil
+        f = df
       end
     end
   end
   
-  return x, y, d, l, s, dr
+  return x, y, d, l, s, dr, f
   
 end
 

@@ -7,28 +7,80 @@ lg = love.graphics
 
 local gameWidth, gameHeight = 800, 600 --fixed game resolution
 local windowWidth, windowHeight = love.window.getDesktopDimensions()
+GLOBALPLAYERS = 1
+local title
+local titleFont
+
+GLOBALSCALE = .5
+
+local gameStates = {
+  
+    titleScreen = 1,
+    mainScreen = 2,
+    pauseScreen = 3,
+    gameOver = 4
+  
+}
+
+local currentState
 
 function love.load()
-  push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {resizable = true, pixelperfect = true, highdpi = true})
+  
+  -- = 800
+  
+  if windowWidth < 1600 then
+    GLOBALSCALE = .5
+    windowWidth = 800
+    windowHeight = 600
+    gameWidth = 800
+    gameHeight = 600
+  else
+    windowWidth = 1600
+    windowHeight = 1200
+  end
+  
+  push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {resizable = false, pixelperfect = true, highdpi = true})
+  
+  
+  doorFont = lg.newImageFont("/assets/doorFont.png", "1234567890")
+  titleFont = lg.newFont("/assets/Chonburi-Regular.ttf", 40)
+  dreamFont = lg.newFont("/assets/Chonburi-Regular.ttf", 16)
+  lg.setFont(titleFont)
+  lg.setColor(232/255, 193/255, 112/255)
+  
+  currentState = gameStates.mainScreen
+  
+  
+  title = lg.newImage("/assets/title.png")
+  
   E.init()
   C.init()
   P.init()
 end
 
 function love.update(dt)
-  C.update(dt)
-  E.update()
-  P.update()
+  if currentState == gameStates.mainScreen then
+    C.update(dt)
+    E.update()
+    P.update()
+  end
 end
 
 function love.draw()
   push:start()
 
-  C.draw()
-
-  local mx, my = love.mouse.getX(), love.mouse.getY()
-  push:toGame(mx, my)
-  --lg.printf(mx.. ", "..my, mx, my-10, 100, "left")
+  if currentState == gameStates.mainScreen then
+    lg.setFont(doorFont)
+    C.draw()
+  elseif currentState == gameStates.titleScreen then
+    lg.setFont(titleFont)
+    lg.draw(title, 0, 0, 0, .5, .5)
+    lg.setColor(232/255, 193/255, 112/255)
+    lg.printf("1 player", 0, 500, 800,"center")
+    lg.printf("1 player", 0, 500, 800,"center")
+  elseif currentState == gameStates.pauseScreen then
+  elseif currentState == gameStates.gameOver then
+  end
   
   push:finish()
 end

@@ -26,6 +26,8 @@ local thoughtBubbleImg
 local tbLeft = {}
 local tbRight = {}
 local peopleObjs = {}
+local howToOne
+local howToTwo
 
 function C.init()
   
@@ -35,6 +37,8 @@ function C.init()
   elevatorRight = lg.newQuad(320, 376, 192, 192, 512, 640)
   numberSprites = lg.newImage("/assets/highlights.png")
   thoughtBubbleImg = lg.newQuad(192, 448, 128, 64, 512, 640)
+  howToOne = lg.newImage("/assets/howToOne.png")
+  howToTwo = lg.newImage("/assets/howToTwo.png")
   
   InitDoors()
   InitElevatorDoors()
@@ -54,17 +58,16 @@ end
 
 
 function C.draw()
-  lg.draw(background, 0, 0, 0, .5, .5)
+  lg.draw(background, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  lg.draw(howToOne, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
   DrawNumberHighlights()
-  lg.draw(spritesheet, elevatorLeft, 40, E.getPosition("left"), 0, .5, .5)
-  lg.draw(spritesheet, elevatorRight, 400, E.getPosition("right"), 0, .5, .5)
+  lg.draw(spritesheet, elevatorLeft, 40, E.getPosition("left"), 0, GLOBALSCALE, GLOBALSCALE)
+  lg.draw(spritesheet, elevatorRight, 400, E.getPosition("right"), 0, GLOBALSCALE, GLOBALSCALE)
   DrawElevatorIndicators()
   DrawDoors()
   DrawElevatorDoors()
   DrawFrontDoor()
   DrawPeople()
-  
-  
 end
 
 
@@ -192,7 +195,7 @@ end
 
 function DrawFrontDoor()
   
-  lg.draw(spritesheet, frontDoorAnims[frontDoor[3]], frontDoor[1], frontDoor[2], 0, .5, .5)
+  lg.draw(spritesheet, frontDoorAnims[frontDoor[3]], frontDoor[1], frontDoor[2], 0, GLOBALSCALE, GLOBALSCALE)
   
 end
   
@@ -311,9 +314,9 @@ function DrawElevatorDoors()
     local d = elevatorDoors[i]
     local f = elevatorDoorFrames[i]
     local g = elevatorDoorFloors[i]
-    lg.draw(spritesheet, elevatorDoorAnims[d[4]], d[2], d[3], 0, .5, .5) 
-    lg.draw(spritesheet, elevatorFrameAnims[f[4]], f[2], f[3], 0, .5, .5)
-    lg.draw(spritesheet, elevatorDoorFloorQuads[g[3]], g[1], g[2], 0, .5, .5)
+    lg.draw(spritesheet, elevatorDoorAnims[d[4]], d[2], d[3], 0, GLOBALSCALE, GLOBALSCALE) 
+    lg.draw(spritesheet, elevatorFrameAnims[f[4]], f[2], f[3], 0, GLOBALSCALE, GLOBALSCALE)
+    lg.draw(spritesheet, elevatorDoorFloorQuads[g[3]], g[1], g[2], 0, GLOBALSCALE, GLOBALSCALE)
   end
 end
 
@@ -322,8 +325,11 @@ function DrawElevatorIndicators()
   local y1 = E.getPosition("left") + 20
   local y2 = E.getPosition("right") + 20
   
+  lg.setFont(dreamFont)
+  lg.setColor(1, 1, 1)
+  
   if #tbLeft > 0 then
-    lg.draw(spritesheet, thoughtBubbleImg, 52, y1, 0, .5, .5)
+    lg.draw(spritesheet, thoughtBubbleImg, 52, y1, 0, GLOBALSCALE, GLOBALSCALE)
     local str = ""
     for _, v in ipairs(tbLeft) do
       if str == "" then
@@ -333,11 +339,13 @@ function DrawElevatorIndicators()
         str = str .. ", "..v
       end
     end
-    lg.printf(str, 52, y1+2, 40, "center", 0, .5, .5)
+    lg.setColor(0, 0, 0)
+    lg.printf(str, 52, y1+2, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.setColor(1, 1, 1)
   end
   
   if #tbRight > 0 then
-    lg.draw(spritesheet, thoughtBubbleImg, 410, y2, 0, .5, .5)
+    lg.draw(spritesheet, thoughtBubbleImg, 410, y2, 0, GLOBALSCALE, GLOBALSCALE)
     local str = ""
     for _, v in ipairs(tbRight) do
       if str == "" then
@@ -346,8 +354,13 @@ function DrawElevatorIndicators()
         str = str .. ", "..v
       end
     end
-    lg.printf(str, 410, y2+2, 40, "center", 0, .5, .5)
+    lg.setColor(0, 0, 0)
+    lg.printf(str, 410, y2+2, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.setColor(1, 1, 1)
   end
+  
+  lg.setFont(doorFont)
+  
   
 end
 
@@ -356,7 +369,7 @@ function DrawNumberHighlights()
   for k, v in ipairs(areNumbersHighlighted) do
     if v then
       local n = numberHighlights[k]
-      lg.draw(numberSprites, n[1], n[2], n[3], 0, .5, .5 )
+      lg.draw(numberSprites, n[1], n[2], n[3], 0, GLOBALSCALE, GLOBALSCALE )
     end
   end
   
@@ -388,9 +401,9 @@ function DrawDoors()
   
   for i=1, 22 do
     d = doors[i]
-    lg.draw(spritesheet, doorAnims[d[3]], d[1], d[2], 0, .5, .5)
+    lg.draw(spritesheet, doorAnims[d[3]], d[1], d[2], 0, GLOBALSCALE, GLOBALSCALE)
     if d[3] == 1 then
-      lg.printf(d[4], d[1], d[2]+4, 40, "center")
+      lg.printf(d[4], d[1], d[2]+4, 80, "center", 0, GLOBALSCALE, GLOBALSCALE)
     end
   end
   
@@ -410,7 +423,7 @@ function DrawPeople()
   
   for k, v in ipairs(peopleObjs) do
     if v.state ~= 1 then
-      lg.draw(spritesheet, people[v.sprite], v.x, v.y, 0, .5, .5)
+      lg.draw(spritesheet, people[v.sprite], v.x, v.y, 0, GLOBALSCALE, GLOBALSCALE)
     end
   end
   
