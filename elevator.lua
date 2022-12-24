@@ -10,12 +10,16 @@ local doorTimingMax
 local doorTimingMin
 local positionHighest
 local positionLowest
+local elevatorArrive
+local elevatorMove
+local elevatorClose
+local elevatorOpen
 
 function E.init()
   
-  increment = 80
-  elevator1.position = 488
-  elevator2.position = 488
+  increment = 80*GS
+  elevator1.position = 488*GS
+  elevator2.position = 488*GS
   selectedElevator = elevator1
   elevator1.targetFloor = -100
   elevator2.targetFloor = -100
@@ -27,17 +31,25 @@ function E.init()
   elevator2.doorTiming = 100
   elevator1.moveQueue = {}
   elevator2.moveQueue = {}
-  positionHighest = 8
-  positionLowest = 488
-  elevatorSpeed = 3
-  doorSpeed = 1
+  positionHighest = 8*GS
+  positionLowest = 488*GS
+  elevatorSpeed = 3*GS
+  doorSpeed = 1*GS
   doorTimingMax = 120
   doorTimingMin = 100
   elevator1.executingCommand = false
   elevator2.executingCommand = false
   elevator1.peopleMoving = 0
   elevator2.peopleMoving = 0
-
+  elevator1.name = "left"
+  elevator2.name = "right"
+  elevatorArrive = la.newSource("/assets/elevatorArrive.wav", "static")
+  elevatorArrive:setVolume(.5)
+  elevatorMove = la.newSource("/assets/elevatorMove.wav", "static")
+  elevatorClose = la.newSource("/assets/elevatorClose.wav", "static")
+  elevatorClose:setVolume(.5)
+  elevatorOpen = la.newSource("/assets/elevatorOpen.wav", "static")
+  elevatorOpen:setVolume(.5)
   
 end
 
@@ -76,6 +88,13 @@ function E.getPosition(el)
 end
 
 
+function E.getSelected()
+  
+  return selectedElevator.name
+  
+end
+
+
 --doorStates: 1 = closed, 2 = opening, 3 = open, 4 = closing
 function E.getDoorStatus(i)
   local e = elevator1
@@ -96,22 +115,36 @@ function E.getDoorStatus(i)
 end
 
 
-function E.doorOpen()
+function E.doorOpen(n)
+  
+  if n == 1 then
+    selectedElevator = elevator1
+  elseif n == 2 then
+    selectedElevator = elevator2
+  end
   
   if selectedElevator.executingCommand or selectedElevator.peopleMoving > 0 then
     return
   end
   
   if selectedElevator.doorState == 1 then
+    elevatorOpen:play()
     selectedElevator.doorState = 2
   elseif selectedElevator.doorState == 3 then
+    elevatorClose:play()
     selectedElevator.doorState = 4
   end
   
 end
 
 
-function E.moveElevator(dir)
+function E.moveElevator(dir, n)
+  
+  if n == 1 then
+    selectedElevator = elevator1
+  elseif n == 2 then
+    selectedElevator = elevator2
+  end 
   
   if selectedElevator.doorState ~= 1 or selectedElevator.executingCommand or selectedElevator.peopleMoving > 0 then
     AddToMovementQueue(dir)
@@ -264,6 +297,7 @@ function CheckDoorTiming(el)
   if el.doorState == 2 then
     if math.abs(doorTimingMax - el.doorTiming) < doorSpeed then
       el.doorState = 3
+      elevatorArrive:play()
       el.doorTiming = doorTimingMax
     else
       el.doorTiming = el.doorTiming + doorSpeed

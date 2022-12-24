@@ -4,32 +4,31 @@ local P = require "person"
 local push = require "lib/push"
 
 lg = love.graphics
+la = love.audio
 
-local gameWidth, gameHeight = 800, 600 --fixed game resolution
+local gameWidth, gameHeight = 1600, 1200 --fixed game resolution
 local windowWidth, windowHeight = love.window.getDesktopDimensions()
 GLOBALPLAYERS = 1
 local title
-local titleFont
+local ballPos
 
-GLOBALSCALE = .5
+GLOBALSCALE = 1
+GS = 2
 
-local gameStates = {
-  
-    titleScreen = 1,
-    mainScreen = 2,
-    pauseScreen = 3,
-    gameOver = 4
-  
-}
-
-local currentState
 
 function love.load()
-  
-  -- = 800
+  gameStates = {
+  titleScreen = 1,
+  mainScreen = 2,
+  pauseScreen = 3,
+  gameOver = 4
+}
+
+--windowWidth = 800
   
   if windowWidth < 1600 or windowHeight < 1200 then
     GLOBALSCALE = .5
+    GS = 1
     windowWidth = 800
     windowHeight = 600
     gameWidth = 800
@@ -37,6 +36,7 @@ function love.load()
   else
     windowWidth = 1600
     windowHeight = 1200
+    GS = 2
   end
   
   push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {resizable = false, pixelperfect = true, highdpi = true})
@@ -48,7 +48,9 @@ function love.load()
   lg.setFont(titleFont)
   lg.setColor(232/255, 193/255, 112/255)
   
-  currentState = gameStates.mainScreen
+  currentState = gameStates.titleScreen
+  
+  ballPos = 476*GS
   
   
   title = lg.newImage("/assets/title.png")
@@ -72,15 +74,20 @@ function love.draw()
   if currentState == gameStates.mainScreen then
     lg.setFont(doorFont)
     C.draw()
+    P.draw()
   elseif currentState == gameStates.titleScreen then
     lg.setFont(titleFont)
-    lg.draw(title, 0, 0, 0, .5, .5)
+    lg.draw(title, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
     lg.setColor(232/255, 193/255, 112/255)
-    lg.printf("1 player", 0, 500, 800,"center")
-    lg.printf("1 player", 0, 500, 800,"center")
+    lg.printf("press '1' for 1 player", 160*GS, 460*GS, 560*GS,"left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("press '2' for 2 player", 160*GS, 480*GS, 560*GS,"left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("press 'enter' to begin", 160*GS, 540*GS, 1000*GS,"left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.circle("fill", 152*GS, ballPos, 6*GS)
   elseif currentState == gameStates.pauseScreen then
+    C.drawPauseScreen()
   elseif currentState == gameStates.gameOver then
-  end
+    P.drawGameOver()
+end
   
   push:finish()
 end
@@ -137,7 +144,6 @@ function love.keypressed(key, scancode, isrepeat)
         currentState = gameStates.pauseScreen
       end
     end
->>>>>>> Stashed changes
   end
 end
 
