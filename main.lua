@@ -28,7 +28,7 @@ function love.load()
   
   -- = 800
   
-  if windowWidth < 1600 then
+  if windowWidth < 1600 or windowHeight < 1200 then
     GLOBALSCALE = .5
     windowWidth = 800
     windowHeight = 600
@@ -86,20 +86,58 @@ function love.draw()
 end
 
 function love.keypressed(key, scancode, isrepeat)
-  if key == "space" then
-    E.doorOpen()
-  elseif key == "up" or key == "w" then
-    E.moveElevator("up")
-  elseif key == "down" or key == "s" then
-    E.moveElevator("down")
-  elseif key == "left" or key == "a" then
-    E.switchElevators(1)
-  elseif key == "right" or key == "d" then
-    E.switchElevators(2)
-  elseif key == "tab" then
-    E.switchElevators(3)
-  elseif key == "esc" then
-    --pause game
+  if key == "f" then
+    push:switchFullscreen(gameWidth, gameHeight)
+  end
+  if currentState == gameStates.titleScreen then
+    if key == "1" then
+      GLOBALPLAYERS = 1
+      ballPos = 476*GS
+    elseif key == "2" then
+      GLOBALPLAYERS = 2
+      ballPos = 496*GS
+    elseif key == "return" then
+      currentState = gameStates.pauseScreen
+    end
+  elseif currentState == gameStates.pauseScreen then
+    if key == "return" then
+      currentState = gameStates.mainScreen
+    end
+  elseif currentState == gameStates.mainScreen then
+    if GLOBALPLAYERS == 1 then
+      if key == "space" then
+        E.doorOpen(0)
+      elseif key == "up" or key == "w" then
+        E.moveElevator("up", 0)
+      elseif key == "down" or key == "s" then
+        E.moveElevator("down", 0)
+      elseif key == "left" or key == "a" then
+        E.switchElevators(1)
+      elseif key == "right" or key == "d" then
+        E.switchElevators(2)
+      elseif key == "tab" then
+        E.switchElevators(3)
+      elseif key == "escape" then
+        currentState = gameStates.pauseScreen
+      end
+    elseif GLOBALPLAYERS == 2 then
+      if key == "lshift" then
+        E.doorOpen(1)
+      elseif key == "rshift" then
+        E.doorOpen(2)
+      elseif key == "up" then
+        E.moveElevator("up", 2)
+      elseif  key == "w" then
+        E.moveElevator("up", 1)
+      elseif key == "down" then 
+        E.moveElevator("down", 2)
+      elseif key == "s" then
+        E.moveElevator("down", 1)
+      elseif key == "escape" then
+        currentState = gameStates.pauseScreen
+      end
+    end
+>>>>>>> Stashed changes
   end
 end
 
