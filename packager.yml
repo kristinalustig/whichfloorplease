@@ -1,6 +1,6 @@
 name: whichfloorplease
 shortname: whichfloorplease
-version: 0.0.1
+version: 0.0.2
 assets:
   - "*.lua"
   - assets/**/*

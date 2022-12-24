@@ -145,11 +145,11 @@ function P.draw()
   if GLOBALPLAYERS == 2 then
     lg.printf("P1: "..scoreL, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
     lg.printf(scoreR..": P2", 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
-    lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
-    lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 24*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(timeLeft, 206*GS, 2*GS, 240, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 24*GS, 240, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
   else
-    lg.printf("Score: "..scoreL+scoreR, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
-    lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf("Score: "..scoreL+scoreR, 124*GS, 2*GS, 480, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(timeLeft, 206*GS, 2*GS, 240, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
     lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
   end
 end
@@ -171,10 +171,10 @@ function P.drawGameOver()
     lg.printf("Player 2: "..scoreR, 400*GS, 200*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
   else
     lg.printf("Your score was "..scoreL + scoreR.."!", 400*GS, 160*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
-    lg.printf("You moved a total of "..numPeopleMovedL+numPeopleMovedR.." people!", 400*GS, 180*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("You moved a total of "..numPeopleMovedL+numPeopleMovedR.." people!", 400*GS, 200*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
   end
-  lg.printf("To play again, restart the program.", 100*GS, 400*GS, 600*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
-  lg.printf("All art, code, and music by kristinamay. Additional SFX, font, and playtesting credits on itch.io!", 100*GS, 500*GS, 600*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+  lg.printf("To play again, restart the program.", 100*GS, 400*GS, 1200, "center", 0, GLOBALSCALE, GLOBALSCALE)
+  lg.printf("All art, code, and music by kristinamay. Additional SFX, font, and playtesting credits on itch.io!", 100*GS, 500*GS, 1200, "center", 0, GLOBALSCALE, GLOBALSCALE)
 end
 
 

@@ -11,6 +11,8 @@ local windowWidth, windowHeight = love.window.getDesktopDimensions()
 GLOBALPLAYERS = 1
 local title
 local ballPos
+local jazz
+local os = love.system.getOS()
 
 GLOBALSCALE = 1
 GS = 2
@@ -25,8 +27,12 @@ function love.load()
 }
 
 --windowWidth = 800
+
+  jazz = la.newSource("/assets/jazz.mp3", "stream")
+  jazz:setLooping(true)
+  jazz:play()
   
-  if windowWidth < 1600 or windowHeight < 1200 then
+  if windowWidth < 1600 or windowHeight < 1200 or os == "web" then
     GLOBALSCALE = .5
     GS = 1
     windowWidth = 800
