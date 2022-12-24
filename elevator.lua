@@ -10,6 +10,10 @@ local doorTimingMax
 local doorTimingMin
 local positionHighest
 local positionLowest
+local elevatorArrive
+local elevatorMove
+local elevatorClose
+local elevatorOpen
 
 function E.init()
   
@@ -37,7 +41,13 @@ function E.init()
   elevator2.executingCommand = false
   elevator1.peopleMoving = 0
   elevator2.peopleMoving = 0
-
+  elevatorArrive = la.newSource("/assets/elevatorArrive.wav", "static")
+  elevatorArrive:setVolume(.5)
+  elevatorMove = la.newSource("/assets/elevatorMove.wav", "static")
+  elevatorClose = la.newSource("/assets/elevatorClose.wav", "static")
+  elevatorClose:setVolume(.5)
+  elevatorOpen = la.newSource("/assets/elevatorOpen.wav", "static")
+  elevatorOpen:setVolume(.5)
   
 end
 
@@ -96,22 +106,36 @@ function E.getDoorStatus(i)
 end
 
 
-function E.doorOpen()
+function E.doorOpen(n)
+  
+  if n == 1 then
+    selectedElevator = elevator1
+  elseif n == 2 then
+    selectedElevator = elevator2
+  end
   
   if selectedElevator.executingCommand or selectedElevator.peopleMoving > 0 then
     return
   end
   
   if selectedElevator.doorState == 1 then
+    elevatorOpen:play()
     selectedElevator.doorState = 2
   elseif selectedElevator.doorState == 3 then
+    elevatorClose:play()
     selectedElevator.doorState = 4
   end
   
 end
 
 
-function E.moveElevator(dir)
+function E.moveElevator(dir, n)
+  
+  if n == 1 then
+    selectedElevator = elevator1
+  elseif n == 2 then
+    selectedElevator = elevator2
+  end 
   
   if selectedElevator.doorState ~= 1 or selectedElevator.executingCommand or selectedElevator.peopleMoving > 0 then
     AddToMovementQueue(dir)
@@ -264,6 +288,7 @@ function CheckDoorTiming(el)
   if el.doorState == 2 then
     if math.abs(doorTimingMax - el.doorTiming) < doorSpeed then
       el.doorState = 3
+      elevatorArrive:play()
       el.doorTiming = doorTimingMax
     else
       el.doorTiming = el.doorTiming + doorSpeed
