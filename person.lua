@@ -3,33 +3,50 @@ local E = require "elevator"
 P = {}
 
 local people = {}
-local maxSprites = 16
-local numPeople = 50
-local peopleWaiting = {}
-local peopleInElevators = {}
-local destinations = {}
-local states = {}
-local pSpeed = 1
-local incr = 1
-local doorDelta = 14
+local maxSprites
+local numPeople
+local peopleWaiting 
+local peopleInElevators
+local destinations 
+local states
+local pSpeed 
+local incr
+local doorDelta
 local waitingStartL
 local waitingStartR
 local elevatorWaitingStartL
 local elevatorWaitingStartR
-local tutorial = true
-local numPeopleMoved = 0
-local queueSpacing = 2
-local elevatorDeltaY = 44
-local spawnRate = 20
-local doorOffsetY = 12
-local doorOffsetX = 4
-
+local tutorial
+local numPeopleMoved
+local queueSpacing 
+local elevatorDeltaY 
+local spawnRate
+local doorOffsetY
+local doorOffsetX 
 function P.init()
   
-  waitingStartL = 120
-  waitingStartR = 392
-  elevatorWaitingStartL = 50
-  elevatorWaitingStartR = 450
+  people = {}
+  maxSprites = 16
+  numPeople = 50
+  peopleWaiting = {}
+  peopleInElevators = {}
+  destinations = {}
+  states = {}
+  pSpeed = 1*GS
+  incr = 1
+  doorDelta = 14*GS
+  tutorial = true
+  numPeopleMoved = 0
+  queueSpacing = 2*GS
+  elevatorDeltaY = 44*GS
+  spawnRate = 20
+  doorOffsetY = 12*GS
+  doorOffsetX = 4*GS
+  
+  waitingStartL = 120*GS
+  waitingStartR = 392*GS
+  elevatorWaitingStartL = 50*GS
+  elevatorWaitingStartR = 450*GS
   
   destinations = 
   {
@@ -103,7 +120,7 @@ function CreatePeople()
     local x, y = C.getLoc(loc)
     people[#people].x, people[#people].y = x+doorOffsetX, y+doorOffsetY
     if loc == "out" then
-      people[#people].x = people[#people].x + 10
+      people[#people].x = people[#people].x + 10*GS
     end
   end
   
@@ -371,9 +388,9 @@ function Move(x, y, d, l, s, f, dr)
     --adjust X toward destination
     local doorX, _ = C.getLoc(dr)
     if dr == 23 then
-      doorX = doorX + 20
+      doorX = doorX + 20*GS
     else
-      doorX = doorX + 10
+      doorX = doorX + 10*GS
     end
     if doorX > x and math.abs(doorX - x) > 2 then
       x = x + pSpeed

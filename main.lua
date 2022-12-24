@@ -5,13 +5,14 @@ local push = require "lib/push"
 
 lg = love.graphics
 
-local gameWidth, gameHeight = 800, 600 --fixed game resolution
+local gameWidth, gameHeight = 1600, 1200 --fixed game resolution
 local windowWidth, windowHeight = love.window.getDesktopDimensions()
 GLOBALPLAYERS = 1
 local title
 local titleFont
 
-GLOBALSCALE = .5
+GLOBALSCALE = 1
+GS = 2
 
 local gameStates = {
   
@@ -26,10 +27,9 @@ local currentState
 
 function love.load()
   
-  -- = 800
-  
   if windowWidth < 1600 then
     GLOBALSCALE = .5
+    GS = 1
     windowWidth = 800
     windowHeight = 600
     gameWidth = 800
@@ -37,14 +37,15 @@ function love.load()
   else
     windowWidth = 1600
     windowHeight = 1200
+    GS = 2
   end
   
   push:setupScreen(gameWidth, gameHeight, windowWidth, windowHeight, {resizable = false, pixelperfect = true, highdpi = true})
   
   
   doorFont = lg.newImageFont("/assets/doorFont.png", "1234567890")
-  titleFont = lg.newFont("/assets/Chonburi-Regular.ttf", 40)
-  dreamFont = lg.newFont("/assets/Chonburi-Regular.ttf", 16)
+  titleFont = lg.newFont("/assets/Chonburi-Regular.ttf", 40*GLOBALSCALE)
+  dreamFont = lg.newFont("/assets/Chonburi-Regular.ttf", 16*GLOBALSCALE)
   lg.setFont(titleFont)
   lg.setColor(232/255, 193/255, 112/255)
   
@@ -74,10 +75,10 @@ function love.draw()
     C.draw()
   elseif currentState == gameStates.titleScreen then
     lg.setFont(titleFont)
-    lg.draw(title, 0, 0, 0, .5, .5)
+    lg.draw(title, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
     lg.setColor(232/255, 193/255, 112/255)
-    lg.printf("1 player", 0, 500, 800,"center")
-    lg.printf("1 player", 0, 500, 800,"center")
+    lg.printf("1 player", 0, 500*GS, 500*GS,"center")
+    lg.printf("1 player", 0, 500*GS, 500*GS,"center")
   elseif currentState == gameStates.pauseScreen then
   elseif currentState == gameStates.gameOver then
   end

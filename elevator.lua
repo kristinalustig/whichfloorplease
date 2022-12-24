@@ -13,9 +13,9 @@ local positionLowest
 
 function E.init()
   
-  increment = 80
-  elevator1.position = 488
-  elevator2.position = 488
+  increment = 80*GS
+  elevator1.position = 488*GS
+  elevator2.position = 488*GS
   selectedElevator = elevator1
   elevator1.targetFloor = -100
   elevator2.targetFloor = -100
@@ -27,10 +27,10 @@ function E.init()
   elevator2.doorTiming = 100
   elevator1.moveQueue = {}
   elevator2.moveQueue = {}
-  positionHighest = 8
-  positionLowest = 488
-  elevatorSpeed = 3
-  doorSpeed = 1
+  positionHighest = 8*GS
+  positionLowest = 488*GS
+  elevatorSpeed = 3*GS
+  doorSpeed = 1*GS
   doorTimingMax = 120
   doorTimingMin = 100
   elevator1.executingCommand = false

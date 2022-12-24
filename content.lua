@@ -28,6 +28,7 @@ local tbRight = {}
 local peopleObjs = {}
 local howToOne
 local howToTwo
+local incr
 
 function C.init()
   
@@ -39,6 +40,8 @@ function C.init()
   thoughtBubbleImg = lg.newQuad(192, 448, 128, 64, 512, 640)
   howToOne = lg.newImage("/assets/howToOne.png")
   howToTwo = lg.newImage("/assets/howToTwo.png")
+  
+  incr = 80*GS
   
   InitDoors()
   InitElevatorDoors()
@@ -61,8 +64,8 @@ function C.draw()
   lg.draw(background, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
   lg.draw(howToOne, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
   DrawNumberHighlights()
-  lg.draw(spritesheet, elevatorLeft, 40, E.getPosition("left"), 0, GLOBALSCALE, GLOBALSCALE)
-  lg.draw(spritesheet, elevatorRight, 400, E.getPosition("right"), 0, GLOBALSCALE, GLOBALSCALE)
+  lg.draw(spritesheet, elevatorLeft, 40*GS, E.getPosition("left"), 0, GLOBALSCALE, GLOBALSCALE)
+  lg.draw(spritesheet, elevatorRight, 400*GS, E.getPosition("right"), 0, GLOBALSCALE, GLOBALSCALE)
   DrawElevatorIndicators()
   DrawDoors()
   DrawElevatorDoors()
@@ -189,7 +192,7 @@ function InitFrontDoor()
     lg.newQuad(384, 128, 128, 100, 512, 640)
   }
   
-  frontDoor = {228, 516, 1}
+  frontDoor = {228*GS, 516*GS, 1}
   
 end
 
@@ -248,12 +251,12 @@ end
 
 function InitNumberHighlights()
   
-  local highlightPosY = 504
-  local highlightPosX = 44
+  local highlightPosY = 504*GS
+  local highlightPosX = 44*GS
   
   for i=0, 1 do
     for j = 1,7 do
-      table.insert(numberHighlights, {lg.newQuad(i*160, 1120-j*160, 160, 160, 320, 1120), highlightPosX+(i*376), highlightPosY-((j-1)*80)})
+      table.insert(numberHighlights, {lg.newQuad(i*160, 1120-j*160, 160, 160, 320, 1120), highlightPosX+(i*376*GS), highlightPosY-((j-1)*incr)})
       table.insert(areNumbersHighlighted, false)
     end
   end
@@ -287,22 +290,22 @@ function InitElevatorDoors()
   --id = 1, x = 2, y = 3, currAnimNum = 4 <-- doors
   --id = 1,, x = 2, y = 3, upOrDown = 4 <-- frames
   for i=1, 7 do
-    table.insert(elevatorDoorFrames, {i, 104, 500-(80*(i-1)), 1})
-    table.insert(elevatorDoors, {i, 108, 512-(80*(i-1)), 1})
+    table.insert(elevatorDoorFrames, {i, 104*GS, 500*GS-(incr*(i-1)), 1})
+    table.insert(elevatorDoors, {i, 108*GS, 512*GS-(incr*(i-1)), 1})
     if i == 1 or i == 7 then
-      table.insert(elevatorDoorFloors, {110, 560-(80*(i-1)), 3})
+      table.insert(elevatorDoorFloors, {110*GS, 560*GS-(incr*(i-1)), 3})
     else
-      table.insert(elevatorDoorFloors, {110, 560-(80*(i-1)), 1})
+      table.insert(elevatorDoorFloors, {110*GS, 560*GS-(incr*(i-1)), 1})
     end
   end
   
   for i=8, 14 do
-    table.insert(elevatorDoorFrames, {i, 388, 500-(80*(i-8)), 1})
-    table.insert(elevatorDoors, {i, 392, 512-(80*(i-8)), 1})
+    table.insert(elevatorDoorFrames, {i, 388*GS, 500*GS-(incr*(i-8)), 1})
+    table.insert(elevatorDoors, {i, 392*GS, 512*GS-(incr*(i-8)), 1})
     if i == 8 or i == 14 then
-      table.insert(elevatorDoorFloors, {398, 560-(80*(i-8)), 4})
+      table.insert(elevatorDoorFloors, {398*GS, 560*GS-(incr*(i-8)), 4})
     else
-      table.insert(elevatorDoorFloors, {398, 560-(80*(i-8)), 2})
+      table.insert(elevatorDoorFloors, {398*GS, 560*GS-(incr*(i-8)), 2})
     end
   end
   
@@ -322,14 +325,14 @@ end
 
 function DrawElevatorIndicators()
   
-  local y1 = E.getPosition("left") + 20
-  local y2 = E.getPosition("right") + 20
+  local y1 = E.getPosition("left") + 20*GS
+  local y2 = E.getPosition("right") + 20*GS
   
   lg.setFont(dreamFont)
   lg.setColor(1, 1, 1)
   
   if #tbLeft > 0 then
-    lg.draw(spritesheet, thoughtBubbleImg, 52, y1, 0, GLOBALSCALE, GLOBALSCALE)
+    lg.draw(spritesheet, thoughtBubbleImg, 52*GS, y1, 0, GLOBALSCALE, GLOBALSCALE)
     local str = ""
     for _, v in ipairs(tbLeft) do
       if str == "" then
@@ -340,12 +343,12 @@ function DrawElevatorIndicators()
       end
     end
     lg.setColor(0, 0, 0)
-    lg.printf(str, 52, y1+2, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf(str, 52*GS, y1+2*GS, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
     lg.setColor(1, 1, 1)
   end
   
   if #tbRight > 0 then
-    lg.draw(spritesheet, thoughtBubbleImg, 410, y2, 0, GLOBALSCALE, GLOBALSCALE)
+    lg.draw(spritesheet, thoughtBubbleImg, 410*GS, y2, 0, GLOBALSCALE, GLOBALSCALE)
     local str = ""
     for _, v in ipairs(tbRight) do
       if str == "" then
@@ -355,7 +358,7 @@ function DrawElevatorIndicators()
       end
     end
     lg.setColor(0, 0, 0)
-    lg.printf(str, 410, y2+2, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf(str, 410*GS, y2+2*GS, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
     lg.setColor(1, 1, 1)
   end
   
@@ -387,12 +390,12 @@ function InitDoors()
   for i=1, 5 do
     for j = 1, 4 do
       local doorNum = (i+1).."0"..j
-      table.insert(doors, {144 + ((j-1)*64), 436-((i-1)*80), 1, doorNum})
+      table.insert(doors, {144*GS + ((j-1)*64*GS), 436*GS-((i-1)*incr), 1, doorNum})
     end
   end
   
-  table.insert(doors, {144, 36, 1, "pool"})
-  table.insert(doors, {336, 36, 1, "gym"})
+  table.insert(doors, {144*GS, 36*GS, 1, "pool"})
+  table.insert(doors, {336*GS, 36*GS, 1, "gym"})
   
 end
 
