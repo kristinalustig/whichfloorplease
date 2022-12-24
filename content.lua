@@ -28,6 +28,14 @@ local tbRight = {}
 local peopleObjs = {}
 local howToOne
 local howToTwo
+local incr
+local floorIndicators = {}
+local pauseScreen
+local angryOutline
+local scoreL
+local scoreR
+local psState
+local elevatorHighlight
 
 function C.init()
   
@@ -36,15 +44,24 @@ function C.init()
   elevatorLeft = lg.newQuad(0, 376, 192, 192, 512, 640)
   elevatorRight = lg.newQuad(320, 376, 192, 192, 512, 640)
   numberSprites = lg.newImage("/assets/highlights.png")
-  thoughtBubbleImg = lg.newQuad(192, 448, 128, 64, 512, 640)
+  thoughtBubbleImg = lg.newQuad(192, 512, 128, 64, 512, 640)
   howToOne = lg.newImage("/assets/howToOne.png")
   howToTwo = lg.newImage("/assets/howToTwo.png")
+  pauseScreen = lg.newImage("/assets/pauseScreen.png")
+  angryOutline = lg.newQuad(448, 256, 64, 128, 512, 640)
+  elevatorHighlight = lg.newImage("/assets/elevatorHighlight.png")
+  scoreL = 0
+  scoreR = 0
+  
+  incr = 80*GS
   
   InitDoors()
   InitElevatorDoors()
   InitNumberHighlights()
   InitPeople()
   InitFrontDoor()
+  InitFloorIndicators()
+  psState = false
   
 end
 
@@ -58,16 +75,75 @@ end
 
 
 function C.draw()
+  C.resetScore()
   lg.draw(background, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
-  lg.draw(howToOne, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 2 then
+    lg.draw(howToTwo, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  else
+    lg.draw(howToOne, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  end
   DrawNumberHighlights()
-  lg.draw(spritesheet, elevatorLeft, 40, E.getPosition("left"), 0, GLOBALSCALE, GLOBALSCALE)
-  lg.draw(spritesheet, elevatorRight, 400, E.getPosition("right"), 0, GLOBALSCALE, GLOBALSCALE)
+  local sel = E.getSelected()
+  lg.draw(spritesheet, elevatorLeft, 40*GS, E.getPosition("left"), 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 1 and sel == "left" then
+    lg.draw(elevatorHighlight, 40*GS, E.getPosition("left")+(16*GS), 0, GLOBALSCALE, GLOBALSCALE)
+  end
+  lg.draw(spritesheet, elevatorRight, 400*GS, E.getPosition("right"), 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 1 and sel == "right" then
+    lg.draw(elevatorHighlight, 400*GS, E.getPosition("right")+(16*GS), 0, GLOBALSCALE, GLOBALSCALE)
+  end
   DrawElevatorIndicators()
   DrawDoors()
   DrawElevatorDoors()
   DrawFrontDoor()
   DrawPeople()
+  DrawFloorIndicators()
+end
+
+function C.drawPauseScreen()
+  lg.draw(pauseScreen, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 2 then
+    lg.draw(howToTwo, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  else
+    lg.draw(howToOne, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  end
+  lg.setFont(titleFont)
+  
+  if psState then
+    --put scores
+    if GLOBALPLAYERS == 1 then
+      local score = scoreL + scoreR
+    else
+      local p1Wins = scoreL > scoreR
+      if p1Wins then
+        lg.printf("Player One wins the round "..scoreL.." to "..scoreR.."!", 0, 100*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+      else
+        lg.printf("Player Two wins the round "..scoreR.." to "..scoreL.."!", 0, 200*GS, 520*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+      end
+    end
+    lg.printf("READY...", 0, 360*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("SET...", 0, 380*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Press enter to start the next round", 0, 400*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+  else
+    lg.printf("GAME PAUSED", 0, 40*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("You'll be playing as an elevator operator.", 0, 90*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Control your elevator with the directions to the right.", 0, 120*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("The faster your get residents to their destinations, the higher your score! If you're slow, they might turn red with anger.", 0, 180*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("READY...", 0, 360*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("SET...", 0, 380*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    --regular pause screen
+    lg.printf("Press enter to get moving!", 0, 400*GS, 1040, "center", 0, GLOBALSCALE, GLOBALSCALE)
+  end
+  
+  
+end
+
+function C.resetScore()
+  
+  psState = false
+  scoreL = 0
+  scoreR = 0
+  
 end
 
 
@@ -80,6 +156,15 @@ function C.getLoc(l)
   end
   
 end
+
+function C.updateScore(l, r, ps)
+  
+  scoreL = l
+  scoreR = r
+  psState = ps
+  
+end
+
 
 function C.getAptDoorStatus(l)
   
@@ -171,6 +256,39 @@ function C.updateElevatorIndicator(el, df, act)
   
 end
 
+
+function C.updateFloorIndicator(el, cf, df, act)
+  
+  local tb
+  if el == "left" then
+    tb = floorIndicators[cf].left.waiting
+  else
+    tb = floorIndicators[cf].right.waiting
+  end
+  
+  for k, v in ipairs(tb) do
+    if v == df then 
+      if act == "remove" then
+        if el == "left" then
+          table.remove(floorIndicators[cf].left.waiting, k)
+        else
+          table.remove(floorIndicators[cf].right.waiting, k)
+        end
+      end
+      return
+    end
+  end
+  if act == "add" then
+    if el == "left" then
+      table.insert(floorIndicators[cf].left.waiting, df)
+    else
+      table.insert(floorIndicators[cf].right.waiting, df)
+    end
+  end
+  
+end
+
+
 function C.updatePeople(p)
   
   peopleObjs = p
@@ -178,6 +296,66 @@ function C.updatePeople(p)
 end
 
 -------USED LOCALLY ONLY -----------
+
+
+function InitFloorIndicators()
+  
+  for j = 1,7 do
+    table.insert(floorIndicators, 
+      {left = {
+          x = 110*GS, 
+          y = 512*GS-(incr*(j-1)),
+          waiting = {}
+        }, 
+      right = {
+        x = 376*GS, 
+        y = 512*GS-(incr*(j-1)), 
+        waiting = {}
+      }
+    })
+  end
+  
+end
+
+
+function DrawFloorIndicators()
+  
+  lg.setFont(dreamFont)
+  
+  for k, v in ipairs(floorIndicators) do
+    if #v.left.waiting > 0 then
+      lg.draw(spritesheet, thoughtBubbleImg, v.left.x, v.left.y, 0, GLOBALSCALE, GLOBALSCALE)
+      local str = ""
+      for k1, v1 in ipairs(v.left.waiting) do
+        if str == "" then
+          str = GetName(v1)
+        else
+          str = str .. ", "..GetName(v1)
+        end
+      end
+      lg.setColor(0, 0, 0)
+      lg.printf(str, v.left.x, v.left.y+4*GS, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+      lg.setColor(1, 1, 1)
+    end
+    if #v.right.waiting > 0 then
+      lg.draw(spritesheet, thoughtBubbleImg, v.right.x, v.right.y, 0, GLOBALSCALE, GLOBALSCALE)
+      local str = ""
+      for k1, v1 in ipairs(v.right.waiting) do
+        if str == "" then
+          str = GetName(v1)
+        else
+          str = str .. ", "..GetName(v1)
+        end
+      end
+      lg.setColor(0, 0, 0)
+      lg.printf(str, v.right.x, v.right.y+4*GS, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+      lg.setColor(1, 1, 1)
+    end
+  end
+  
+  lg.setFont(dreamFont)
+end
+
 
 function InitFrontDoor()
   
@@ -189,7 +367,7 @@ function InitFrontDoor()
     lg.newQuad(384, 128, 128, 100, 512, 640)
   }
   
-  frontDoor = {228, 516, 1}
+  frontDoor = {228*GS, 516*GS, 1}
   
 end
 
@@ -248,12 +426,12 @@ end
 
 function InitNumberHighlights()
   
-  local highlightPosY = 504
-  local highlightPosX = 44
+  local highlightPosY = 504*GS
+  local highlightPosX = 44*GS
   
   for i=0, 1 do
     for j = 1,7 do
-      table.insert(numberHighlights, {lg.newQuad(i*160, 1120-j*160, 160, 160, 320, 1120), highlightPosX+(i*376), highlightPosY-((j-1)*80)})
+      table.insert(numberHighlights, {lg.newQuad(i*160, 1120-j*160, 160, 160, 320, 1120), highlightPosX+(i*376*GS), highlightPosY-((j-1)*incr)})
       table.insert(areNumbersHighlighted, false)
     end
   end
@@ -287,22 +465,22 @@ function InitElevatorDoors()
   --id = 1, x = 2, y = 3, currAnimNum = 4 <-- doors
   --id = 1,, x = 2, y = 3, upOrDown = 4 <-- frames
   for i=1, 7 do
-    table.insert(elevatorDoorFrames, {i, 104, 500-(80*(i-1)), 1})
-    table.insert(elevatorDoors, {i, 108, 512-(80*(i-1)), 1})
+    table.insert(elevatorDoorFrames, {i, 104*GS, 500*GS-(incr*(i-1)), 1})
+    table.insert(elevatorDoors, {i, 108*GS, 512*GS-(incr*(i-1)), 1})
     if i == 1 or i == 7 then
-      table.insert(elevatorDoorFloors, {110, 560-(80*(i-1)), 3})
+      table.insert(elevatorDoorFloors, {110*GS, 560*GS-(incr*(i-1)), 3})
     else
-      table.insert(elevatorDoorFloors, {110, 560-(80*(i-1)), 1})
+      table.insert(elevatorDoorFloors, {110*GS, 560*GS-(incr*(i-1)), 1})
     end
   end
   
   for i=8, 14 do
-    table.insert(elevatorDoorFrames, {i, 388, 500-(80*(i-8)), 1})
-    table.insert(elevatorDoors, {i, 392, 512-(80*(i-8)), 1})
+    table.insert(elevatorDoorFrames, {i, 388*GS, 500*GS-(incr*(i-8)), 1})
+    table.insert(elevatorDoors, {i, 392*GS, 512*GS-(incr*(i-8)), 1})
     if i == 8 or i == 14 then
-      table.insert(elevatorDoorFloors, {398, 560-(80*(i-8)), 4})
+      table.insert(elevatorDoorFloors, {398*GS, 560*GS-(incr*(i-8)), 4})
     else
-      table.insert(elevatorDoorFloors, {398, 560-(80*(i-8)), 2})
+      table.insert(elevatorDoorFloors, {398*GS, 560*GS-(incr*(i-8)), 2})
     end
   end
   
@@ -322,40 +500,39 @@ end
 
 function DrawElevatorIndicators()
   
-  local y1 = E.getPosition("left") + 20
-  local y2 = E.getPosition("right") + 20
+  local y1 = E.getPosition("left") + 20*GS
+  local y2 = E.getPosition("right") + 20*GS
   
   lg.setFont(dreamFont)
   lg.setColor(1, 1, 1)
   
   if #tbLeft > 0 then
-    lg.draw(spritesheet, thoughtBubbleImg, 52, y1, 0, GLOBALSCALE, GLOBALSCALE)
+    lg.draw(spritesheet, thoughtBubbleImg, 52*GS, y1, 0, GLOBALSCALE, GLOBALSCALE)
     local str = ""
     for _, v in ipairs(tbLeft) do
       if str == "" then
-        str = v
-        str = v
+        str = GetName(v)
       else
-        str = str .. ", "..v
+        str = str .. ", "..GetName(v)
       end
     end
     lg.setColor(0, 0, 0)
-    lg.printf(str, 52, y1+2, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf(str, 52*GS, y1+2*GS, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
     lg.setColor(1, 1, 1)
   end
   
   if #tbRight > 0 then
-    lg.draw(spritesheet, thoughtBubbleImg, 410, y2, 0, GLOBALSCALE, GLOBALSCALE)
+    lg.draw(spritesheet, thoughtBubbleImg, 410*GS, y2, 0, GLOBALSCALE, GLOBALSCALE)
     local str = ""
     for _, v in ipairs(tbRight) do
       if str == "" then
-        str = v
+        str = GetName(v)
       else
-        str = str .. ", "..v
+        str = str .. ", "..GetName(v)
       end
     end
     lg.setColor(0, 0, 0)
-    lg.printf(str, 410, y2+2, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf(str, 410*GS, y2+2*GS, 100, "center", 0, GLOBALSCALE, GLOBALSCALE)
     lg.setColor(1, 1, 1)
   end
   
@@ -387,12 +564,12 @@ function InitDoors()
   for i=1, 5 do
     for j = 1, 4 do
       local doorNum = (i+1).."0"..j
-      table.insert(doors, {144 + ((j-1)*64), 436-((i-1)*80), 1, doorNum})
+      table.insert(doors, {144*GS + ((j-1)*64*GS), 436*GS-((i-1)*incr), 1, doorNum})
     end
   end
   
-  table.insert(doors, {144, 36, 1, "pool"})
-  table.insert(doors, {336, 36, 1, "gym"})
+  table.insert(doors, {144*GS, 36*GS, 1, "pool"})
+  table.insert(doors, {336*GS, 36*GS, 1, "gym"})
   
 end
 
@@ -409,8 +586,6 @@ function DrawDoors()
   
 end
 
-
-
 function InitPeople()
   
   for i=0, 15 do
@@ -424,9 +599,23 @@ function DrawPeople()
   for k, v in ipairs(peopleObjs) do
     if v.state ~= 1 then
       lg.draw(spritesheet, people[v.sprite], v.x, v.y, 0, GLOBALSCALE, GLOBALSCALE)
+      local a = v.anger/10000
+      lg.setColor(1, 1, 1, a)
+      lg.draw(spritesheet, angryOutline, v.x-(8*GS), v.y-(8*GS), 0, GLOBALSCALE, GLOBALSCALE)
+      lg.setColor(1, 1, 1)
     end
   end
   
+end
+
+function GetName(num)
+  if num == 7 then
+    return "P"
+  elseif num == 1 then
+    return "G"
+  else
+    return num
+  end
 end
 
 return C

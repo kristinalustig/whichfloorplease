@@ -3,33 +3,78 @@ local E = require "elevator"
 P = {}
 
 local people = {}
-local maxSprites = 16
-local numPeople = 50
-local peopleWaiting = {}
-local peopleInElevators = {}
-local destinations = {}
-local states = {}
-local pSpeed = 1
-local incr = 1
-local doorDelta = 14
+local maxSprites
+local numPeople
+local peopleWaiting 
+local peopleInElevators
+local destinations 
+local states
+local pSpeed 
+local incr
+local doorDelta
 local waitingStartL
 local waitingStartR
 local elevatorWaitingStartL
 local elevatorWaitingStartR
-local tutorial = true
-local numPeopleMoved = 0
-local queueSpacing = 2
-local elevatorDeltaY = 44
-local spawnRate = 20
-local doorOffsetY = 12
-local doorOffsetX = 4
+local tutorial
+local numPeopleMovedL
+local numPeopleMovedR
+local queueSpacing 
+local elevatorDeltaY 
+local spawnRate
+local doorOffsetY
+local doorOffsetX 
+local numAngerPointsEarnedL
+local gameOverScreen
+local scoreBoard
+local roundNum
+local timeLeft
+local time
+local numRounds
+
 
 function P.init()
   
-  waitingStartL = 120
-  waitingStartR = 392
-  elevatorWaitingStartL = 50
-  elevatorWaitingStartR = 450
+  gameOverScreen = lg.newImage("/assets/gameOverScreen.png")
+  scoreBoard = lg.newImage("/assets/scoreboard.png")
+  
+  people = {}
+  maxSprites = 16
+  numPeople = 30
+  peopleWaiting = {}
+  peopleInElevators = {}
+  destinations = {}
+  states = {}
+  pSpeed = 1*GS
+  incr = 1
+  doorDelta = 14*GS
+  tutorial = true
+  numPeopleMovedL = 0
+  numPeopleMovedR = 0
+  numAngerPointsEarnedL = 0
+  numAngerPointsEarnedR = 0
+  scoreL = 0
+  scoreR = 0
+  pointsPerServe = 8000
+  queueSpacing = 4*GS
+  elevatorDeltaY = 44*GS
+  if GLOBALPLAYERS == 2 then
+    spawnRate = 10
+  else
+    spawnRate = 20
+  end
+  doorOffsetY = 12*GS
+  doorOffsetX = 4*GS
+  waitingStartL = 120*GS
+  waitingStartR = 392*GS
+  elevatorWaitingStartL = 50*GS
+  elevatorWaitingStartR = 450*GS
+  roundNum = 1
+  timeLeft = 100
+  time = math.floor(love.timer.getTime())
+  
+  timeLeft = 75
+  numRounds = 3
   
   destinations = 
   {
@@ -74,6 +119,62 @@ function P.update()
   UpdatePeopleLocation()
   C.updatePeople(people)
   
+  local newTime = love.timer.getTime()
+  if math.abs(newTime - time) > 1 then
+    timeLeft = timeLeft - 1
+    time = love.timer.getTime()
+  end
+  
+  if timeLeft <= 0 then
+    if roundNum == numRounds then
+      currentState = gameStates.gameOver
+      return
+    end
+    timeLeft = 100
+    C.updateScore(scoreL, scoreR, true)
+    roundNum = roundNum + 1
+    currentState = gameStates.pauseScreen
+  end
+  
+end
+
+function P.draw()
+  
+  lg.setFont(titleFont)
+  lg.draw(scoreBoard, 116*GS, 0, 0, GLOBALSCALE*.4, GLOBALSCALE*.4)
+  if GLOBALPLAYERS == 2 then
+    lg.printf("P1: "..scoreL, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(scoreR..": P2", 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 24*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+  else
+    lg.printf("Score: "..scoreL+scoreR, 124*GS, 2*GS, 720*GS*.5, "left", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf(timeLeft, 206*GS, 2*GS, 320*GS*.5, "center", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+    lg.printf("Round "..roundNum.."/"..numRounds, 206*GS, 4*GS, 540, "right", 0, GLOBALSCALE*.7, GLOBALSCALE*.7)
+  end
+end
+
+function P.drawGameOver()
+  
+  lg.setColor(1, 1, 1)
+  lg.draw(gameOverScreen, 0, 0, 0, GLOBALSCALE, GLOBALSCALE)
+  lg.setFont(titleFont)
+  lg.setColor(232/255, 193/255, 112/255)
+  lg.printf("Thanks for playing!", 400*GS, 100*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+  if GLOBALPLAYERS == 2 then
+    local w = 2
+    if scoreL > scoreR then
+      w = 1
+    end
+    lg.printf("Player "..w.." wins!", 400*GS, 160*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Player 1: "..scoreL, 400*GS, 180*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("Player 2: "..scoreR, 400*GS, 200*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+  else
+    lg.printf("Your score was "..scoreL + scoreR.."!", 400*GS, 160*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+    lg.printf("You moved a total of "..numPeopleMovedL+numPeopleMovedR.." people!", 400*GS, 180*GS, 400*GS, "left", 0, GLOBALSCALE, GLOBALSCALE)
+  end
+  lg.printf("To play again, restart the program.", 100*GS, 400*GS, 600*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
+  lg.printf("All art, code, and music by kristinamay. Additional SFX, font, and playtesting credits on itch.io!", 100*GS, 500*GS, 600*GS, "center", 0, GLOBALSCALE, GLOBALSCALE)
 end
 
 
@@ -99,11 +200,12 @@ function CreatePeople()
         destinationRoom = nil,
         state = states.hidden,
         floor = fl,
-        timeout = 0})
+        timeout = 0,
+        anger = 0})
     local x, y = C.getLoc(loc)
     people[#people].x, people[#people].y = x+doorOffsetX, y+doorOffsetY
     if loc == "out" then
-      people[#people].x = people[#people].x + 10
+      people[#people].x = people[#people].x + 10*GS
     end
   end
   
@@ -180,7 +282,7 @@ function UpdatePeopleLocation()
       if v.timeout > 0 then
         v.timeout = v.timeout - 1
       else
-        v.x, v.y, v.destination, v.location, v.state, v.destinationRoom, v.floor = Move(v.x, v.y, v.destination, v.location, v.state, v.floor, v.destinationRoom)
+        v.x, v.y, v.destination, v.location, v.state, v.destinationRoom, v.floor, v.anger = Move(v.x, v.y, v.destination, v.location, v.state, v.floor, v.destinationRoom, v.anger)
         if v.destination == nil then
           v.timeout = 1000
         end
@@ -192,7 +294,7 @@ end
 
 
 --px, py, dest, loc, state, floor, destination room
-function Move(x, y, d, l, s, f, dr)
+function Move(x, y, d, l, s, f, dr, a)
   
   if f == nil then
     f = GetFloor(l)
@@ -270,6 +372,7 @@ function Move(x, y, d, l, s, f, dr)
     x = x - pSpeed
     if x <= (waitingStartL + (peopleWaiting[f].left*queueSpacing)) then --queue em up
       peopleWaiting[f].left = peopleWaiting[f].left + 1
+      C.updateFloorIndicator("left", f, df, "add")
       s = states.waitElevatorL
     end
   elseif s == states.walkToElevatorR then
@@ -277,6 +380,7 @@ function Move(x, y, d, l, s, f, dr)
     x = x + pSpeed
     if x >= (waitingStartR - (peopleWaiting[f].right*queueSpacing)) then --they arrived, queue em up
       peopleWaiting[f].right = peopleWaiting[f].right + 1
+      C.updateFloorIndicator("right", f, df, "add")
       s = states.waitElevatorR
     end
     
@@ -284,18 +388,24 @@ function Move(x, y, d, l, s, f, dr)
 --------WAITING FOR ELEVATOR
   elseif s == states.waitElevatorL then
     --add one to the queue for that floor
+    a = a + 2
     if E.hasElevatorArrived("left", f) then --they will get in the elevator now
       peopleWaiting[f].left = peopleWaiting[f].left - 1
+      C.updateFloorIndicator("left", f, df, "remove")
       s = states.enterElevatorL
+      a = math.floor(a/2)
       --tell elevators that there is stuff going on
       E.movingInOutElevator("left", "add")
     end
     --maybe add anger if necessary
   elseif s == states.waitElevatorR then
     --add one to the queue for that floor
+    a = a + 2
     if E.hasElevatorArrived("right", f) then --they will get in the elevator now
       peopleWaiting[f].right = peopleWaiting[f].right - 1
+      C.updateFloorIndicator("right", f, df, "remove")
       s = states.enterElevatorR
+      a = math.floor(a/2)
       --tell elevators that there is stuff going on
       E.movingInOutElevator("right", "add")
     end
@@ -326,6 +436,7 @@ function Move(x, y, d, l, s, f, dr)
     
 --------IN ELEVATOR
   elseif s == states.inElevatorL then
+    a = a + 1
     --adjust Y based on elevator Y
     y = E.getPosition("left") + elevatorDeltaY
     --check if elevator is at floor + door open
@@ -334,6 +445,7 @@ function Move(x, y, d, l, s, f, dr)
       E.movingInOutElevator("left", "add")
     end
   elseif s == states.inElevatorR then
+    a = a + 1
     --adjust Y based on elevator Y
     y = E.getPosition("right") + elevatorDeltaY
     --check if elevator is at floor + door open
@@ -352,6 +464,9 @@ function Move(x, y, d, l, s, f, dr)
       C.updateElevatorIndicator("left", df, "remove")
       peopleInElevators.left = peopleInElevators.left - 1
       s = states.walkToDestination
+      numPeopleMovedL = numPeopleMovedL + 1
+      scoreL = scoreL + math.floor((pointsPerServe - a)/10)
+      numAngerPointsEarnedL = numAngerPointsEarnedL + a
       E.movingInOutElevator("left", "remove")
     end
   elseif s == states.exitElevatorR then
@@ -362,6 +477,9 @@ function Move(x, y, d, l, s, f, dr)
       C.updateElevatorIndicator("right", df, "remove")
       peopleInElevators.right = peopleInElevators.right - 1
       s = states.walkToDestination
+      numPeopleMovedR = numPeopleMovedR + 1
+      scoreR = scoreR + math.floor((pointsPerServe - a)/10)
+      numAngerPointsEarnedR = numAngerPointsEarnedR + a
       E.movingInOutElevator("right", "remove")
     end
     
@@ -371,9 +489,9 @@ function Move(x, y, d, l, s, f, dr)
     --adjust X toward destination
     local doorX, _ = C.getLoc(dr)
     if dr == 23 then
-      doorX = doorX + 20
+      doorX = doorX + 20*GS
     else
-      doorX = doorX + 10
+      doorX = doorX + 10*GS
     end
     if doorX > x and math.abs(doorX - x) > 2 then
       x = x + pSpeed
@@ -412,6 +530,7 @@ function Move(x, y, d, l, s, f, dr)
         l = dr
         dr = nil
         f = df
+        a = 0
       end
     end
   elseif s == states.exitBuilding then
@@ -440,7 +559,7 @@ function Move(x, y, d, l, s, f, dr)
     end
   end
   
-  return x, y, d, l, s, dr, f
+  return x, y, d, l, s, dr, f, a
   
 end
 
